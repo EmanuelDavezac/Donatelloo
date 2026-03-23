@@ -24,14 +24,15 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     // 2. Reemplazamos los alert() por Swal.fire() con tus colores
     if (!nombre.trim()) {
       Swal.fire({
-        title: '¡Falta tu nombre!',
-        text: 'Por favor, decinos cómo te llamás para anotar tu pedido.',
-        icon: 'warning',
-        confirmButtonColor: '#04233f', // Tu Azul Noche
-        confirmButtonText: 'Entendido'
-      });
-      return;
-    }
+      title: '¡Pedido listo!',
+      text: 'Te estamos redirigiendo a WhatsApp para confirmar...',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000 
+    }).then(() => {
+      // ACÁ ESTÁ EL CAMBIO CLAVE PARA CELULARES 👇
+      window.location.href = url;
+    });
     
     if (metodoEntrega === 'envio' && !direccion.trim()) {
       Swal.fire({
@@ -61,7 +62,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     texto += `\n*TOTAL:* $${total}\n`;
 
     // 🚨 TU NÚMERO ACÁ (ej: 5493496...)
-    const numeroWhatsApp = "5493496000000"; 
+    const numeroWhatsApp = "5493496502191"; 
     const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(texto)}`;
     
     // Alerta de éxito antes de mandarlo a WhatsApp
