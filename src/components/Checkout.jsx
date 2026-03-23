@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Swal from 'sweetalert2'; // Nueva libreria de Alertas
+import Swal from 'sweetalert2';
 
 export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   const [nombre, setNombre] = useState('');
@@ -21,18 +21,16 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   }));
 
   const enviarPedido = () => {
-    // 2. Reemplazamos los alert() por Swal.fire() con tus colores
     if (!nombre.trim()) {
       Swal.fire({
-      title: '¡Pedido listo!',
-      text: 'Te estamos redirigiendo a WhatsApp para confirmar...',
-      icon: 'success',
-      showConfirmButton: false,
-      timer: 2000 
-    }).then(() => {
-      // ACÁ ESTÁ EL CAMBIO CLAVE PARA CELULARES 👇
-      window.location.href = url;
-    });
+        title: '¡Falta tu nombre!',
+        text: 'Por favor, decinos cómo te llamás para anotar tu pedido.',
+        icon: 'warning',
+        confirmButtonColor: '#04233f',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
     
     if (metodoEntrega === 'envio' && !direccion.trim()) {
       Swal.fire({
@@ -61,19 +59,19 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     
     texto += `\n*TOTAL:* $${total}\n`;
 
-    // 🚨 TU NÚMERO ACÁ (ej: 5493496...)
+    // 🚨 ACORDATE DE PONER TU NÚMERO DE WHATSAPP ACÁ
     const numeroWhatsApp = "5493496502191"; 
     const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(texto)}`;
     
-    // Alerta de éxito antes de mandarlo a WhatsApp
     Swal.fire({
       title: '¡Pedido listo!',
       text: 'Te estamos redirigiendo a WhatsApp para confirmar...',
       icon: 'success',
       showConfirmButton: false,
-      timer: 2000 // Se cierra sola a los 2 segundos
+      timer: 2000 
     }).then(() => {
-      window.open(url, "_blank");
+      // ESTA ES LA LÍNEA MÁGICA PARA LOS CELULARES
+      window.location.href = url;
     });
   };
 
