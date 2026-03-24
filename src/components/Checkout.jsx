@@ -77,13 +77,18 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border-2 border-[#d99d8f]/30">
       
-      {/* BOTÓN ARREGLADO: Ahora tiene un área táctil mucho más grande (py-3, pr-6) y una animación al tocarlo */}
-      <button 
-        onClick={onVolver} 
-        className="text-[#d99d8f] font-bold mb-6 flex items-center gap-2 py-3 pr-6 -ml-2 pl-2 active:scale-95 transition-transform"
-      >
-        <span className="text-xl">❮</span> Volver a la caja
-      </button>
+      <div className="relative z-50 -mt-2 -ml-2 mb-4">
+        <button 
+          onClick={(e) => {
+            e.preventDefault(); // Evita comportamientos raros del navegador
+            onVolver();
+          }} 
+          className="text-[#d99d8f] font-bold flex items-center gap-2 py-4 px-4 rounded-xl active:bg-orange-50 transition-colors w-full text-left"
+        >
+          <span className="text-2xl leading-none">❮</span> 
+          <span className="text-lg">Volver a la caja</span>
+        </button>
+      </div>
 
       <h2 className="text-xl font-bold text-[#04233f] mb-6">Resumen de tu pedido</h2>
       
