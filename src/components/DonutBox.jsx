@@ -16,6 +16,7 @@ export default function DonutBox({ capacidad, titulo, onFinalizar, onVolver }) {
     { id: 'crocante-blanco', nombre: 'Crocante Blanco', img: '/crocante-blanco.png' },
     { id: 'crocante-negro', nombre: 'Crocante Negro', img: '/crocante-negro.png' },
     { id: 'coco-blanco', nombre: 'Coco en Blanco', img: '/coco-blanco.png' },
+    { id: 'coco-negro', nombre: 'Coco en Negro', img: '/coco-negro.png' },
     { id: 'marmolado', nombre: 'Marmolado', img: '/marmolado.png' },
   ];
 
