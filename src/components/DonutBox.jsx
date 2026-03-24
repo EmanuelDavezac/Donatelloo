@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 
-export default function DonutBox({ capacidad, titulo, onFinalizar }) {
+export default function DonutBox({ capacidad, titulo, onFinalizar, onVolver }) {
   const [caja, setCaja] = useState([]);
 
   // Tu menú de sabores conectado a las fotos
@@ -42,12 +42,25 @@ export default function DonutBox({ capacidad, titulo, onFinalizar }) {
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
-       {/* Cabecera flotante con el progreso */}
-       <div className="bg-[#04233f] text-white p-4 rounded-2xl mb-6 shadow-md text-center sticky top-0 z-10">
-          <h2 className="text-xl font-bold mb-1">Armando: {titulo}</h2>
-          <p className="text-[#d99d8f] font-medium text-sm">
-            {faltantes > 0 ? `Te faltan elegir ${faltantes} donitas` : '¡Caja completa! Lista para pedir'}
-          </p>
+       {/* Cabecera flotante con el progreso y el BOTÓN DE VOLVER */}
+       <div className="bg-[#04233f] text-white p-4 rounded-2xl mb-6 shadow-md sticky top-0 z-20 relative">
+          
+          {/* BOTÓN VOLVER TIPO APP NATIVA */}
+          <button 
+            onClick={onVolver} 
+            className="absolute left-2 top-3 text-[#d99d8f] text-3xl p-2 active:scale-90 transition-transform flex items-center justify-center"
+            aria-label="Volver al menú"
+          >
+            ❮
+          </button>
+          
+          <div className="text-center px-6">
+            <h2 className="text-xl font-bold mb-1">Armando: {titulo}</h2>
+            <p className="text-[#d99d8f] font-medium text-sm">
+              {faltantes > 0 ? `Te faltan elegir ${faltantes} donitas` : '¡Caja completa! Lista para pedir'}
+            </p>
+          </div>
+
           {/* Barra de progreso */}
           <div className="w-full bg-white/20 rounded-full h-2 mt-3 overflow-hidden">
             <div 

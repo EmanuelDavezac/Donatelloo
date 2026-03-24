@@ -70,15 +70,19 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       showConfirmButton: false,
       timer: 2000 
     }).then(() => {
-      // ESTA ES LA LÍNEA MÁGICA PARA LOS CELULARES
       window.location.href = url;
     });
   };
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border-2 border-[#d99d8f]/30">
-      <button onClick={onVolver} className="text-[#d99d8f] font-bold mb-4 flex items-center gap-1 hover:text-[#b87c6e]">
-        <span>❮</span> Volver a la caja
+      
+      {/* BOTÓN ARREGLADO: Ahora tiene un área táctil mucho más grande (py-3, pr-6) y una animación al tocarlo */}
+      <button 
+        onClick={onVolver} 
+        className="text-[#d99d8f] font-bold mb-6 flex items-center gap-2 py-3 pr-6 -ml-2 pl-2 active:scale-95 transition-transform"
+      >
+        <span className="text-xl">❮</span> Volver a la caja
       </button>
 
       <h2 className="text-xl font-bold text-[#04233f] mb-6">Resumen de tu pedido</h2>
@@ -109,13 +113,13 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           <div className="flex gap-2">
             <button 
               onClick={() => setMetodoEntrega('retiro')}
-              className={`flex-1 py-2 rounded-xl font-bold border-2 transition-all ${metodoEntrega === 'retiro' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500'}`}
+              className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all active:scale-95 ${metodoEntrega === 'retiro' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
             >
               Retiro
             </button>
             <button 
               onClick={() => setMetodoEntrega('envio')}
-              className={`flex-1 py-2 rounded-xl font-bold border-2 transition-all ${metodoEntrega === 'envio' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500'}`}
+              className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all active:scale-95 ${metodoEntrega === 'envio' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
             >
               Envío
             </button>
@@ -124,7 +128,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
         {metodoEntrega === 'envio' && (
           <div className="animate-fade-in">
-            <label className="block text-sm font-bold text-[#04233f] mb-1">Dirección</label>
+            <label className="block text-sm font-bold text-[#04233f] mb-1">Dirección (Esperanza)</label>
             <input 
               type="text" 
               value={direccion}
@@ -144,7 +148,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
       <button 
         onClick={enviarPedido}
-        className="w-full bg-[#d99d8f] text-[#04233f] text-lg font-bold py-4 rounded-xl shadow-md hover:bg-[#c98d7f] transition-colors"
+        className="w-full bg-[#d99d8f] text-[#04233f] text-lg font-bold py-4 rounded-xl shadow-md hover:bg-[#c98d7f] active:scale-95 transition-all"
       >
         Enviar pedido por WhatsApp
       </button>

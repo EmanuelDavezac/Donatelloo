@@ -32,7 +32,7 @@ function App() {
               <h2 className="text-xl font-bold text-[#04233f] mb-2 mt-2">
                 Nuestras Cajas
               </h2>
-              <p className="text-sm text-gray-500 mb-6">Elegí el tamaño ideal para tu antojo.</p>
+              <p className="text-sm text-gray-500 mb-6">Armá tu caja a medida y elegí tus sabores favoritos.</p>
               
               {/* --- EL DISEÑO TIPO HAMA (Lista Limpia) --- */}
               <div className="flex flex-col">
@@ -94,12 +94,12 @@ function App() {
           )}
 
           {paso === 2 && (
-            <div>
-              <button onClick={() => setPaso(1)} className="text-[#d99d8f] font-bold mb-4 flex items-center gap-1 hover:text-[#b87c6e]">
-                <span>❮</span> Volver al menú
-              </button>
-              <DonutBox capacidad={paquete.cantidad} titulo={paquete.titulo} onFinalizar={finalizarCaja} />
-            </div>
+            <DonutBox 
+              capacidad={paquete.cantidad} 
+              titulo={paquete.titulo} 
+              onFinalizar={finalizarCaja} 
+              onVolver={() => setPaso(1)} 
+            />
           )}
 
           {paso === 3 && (
