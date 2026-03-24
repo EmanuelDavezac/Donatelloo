@@ -1,111 +1,131 @@
 import { useState } from 'react';
-
-// 1. NUESTRA "BASE DE DATOS" DE SABORES REALES DE DONATELLO
-const MENU_SABORES = [
-  { id: 'blanco', nombre: 'Choco Blanco', bg: 'bg-[#fdfbf7]', border: 'border-[#e0d6c8]' },
-  { id: 'negro', nombre: 'Choco Negro', bg: 'bg-[#3e2723]', border: 'border-[#1b100c]' },
-  { id: 'azucarada', nombre: 'Azucarada', bg: 'bg-[#e8c396]', border: 'border-[#cfa75e]' },
-  { id: 'blanco_oreo', nombre: 'Oreo en Blanco', bg: 'bg-[#fdfbf7]', border: 'border-[#e0d6c8]', extra: '🍪' },
-  { id: 'negro_oreo', nombre: 'Oreo en Negro', bg: 'bg-[#3e2723]', border: 'border-[#1b100c]', extra: '🍪' },
-  { id: 'blanco_rocklets', nombre: 'Rocklets Blanco', bg: 'bg-[#fdfbf7]', border: 'border-[#e0d6c8]', extra: '🍬' },
-  { id: 'negro_rocklets', nombre: 'Rocklets Negro', bg: 'bg-[#3e2723]', border: 'border-[#1b100c]', extra: '🍬' },
-  { id: 'blanco_crocante', nombre: 'Crocante Blanco', bg: 'bg-[#fdfbf7]', border: 'border-[#e0d6c8]', extra: '🥜' },
-  { id: 'negro_crocante', nombre: 'Crocante Negro', bg: 'bg-[#3e2723]', border: 'border-[#1b100c]', extra: '🥜' },
-  { id: 'blanco_coco', nombre: 'Coco en Blanco', bg: 'bg-[#fdfbf7]', border: 'border-[#e0d6c8]', extra: '🥥' },
-  { id: 'marmolado', nombre: 'Marmolado', bg: 'bg-[#5d4037]', border: 'border-[#3e2723]', extra: '〰️' },
-];
-
+import Swal from 'sweetalert2';
 
 export default function DonutBox({ capacidad, titulo, onFinalizar }) {
-  const [saboresCaja, setSaboresCaja] = useState(Array(capacidad).fill(null));
-  const [slotActivo, setSlotActivo] = useState(0);
+  const [caja, setCaja] = useState([]);
 
-  const aplicarSabor = (idSabor) => {
-    const nuevaCaja = [...saboresCaja];
-    nuevaCaja[slotActivo] = idSabor;
-    setSaboresCaja(nuevaCaja);
+  // Tu menú de sabores conectado a las fotos
+  const saboresDisponibles = [
+    { id: 'choco-blanco', nombre: 'Choco Blanco', img: '/choco-blanco.png' },
+    { id: 'choco-negro', nombre: 'Choco Negro', img: '/choco-negro.png' },
+    { id: 'azucarada', nombre: 'Azucarada', img: '/azucarada.png' },
+    { id: 'oreo-blanco', nombre: 'Oreo en Blanco', img: '/oreo-blanco.png' },
+    { id: 'oreo-negro', nombre: 'Oreo en Negro', img: '/oreo-negro.png' },
+    { id: 'rocklets-blanco', nombre: 'Rocklets Blanco', img: '/rocklets-blanco.png' },
+    { id: 'rocklets-negro', nombre: 'Rocklets Negro', img: '/rocklets-negro.png' },
+    { id: 'crocante-blanco', nombre: 'Crocante Blanco', img: '/crocante-blanco.png' },
+    { id: 'crocante-negro', nombre: 'Crocante Negro', img: '/crocante-negro.png' },
+    { id: 'coco-blanco', nombre: 'Coco en Blanco', img: '/coco-blanco.png' },
+    { id: 'marmolado', nombre: 'Marmolado', img: '/marmolado.png' },
+  ];
 
-    const siguienteVacio = nuevaCaja.indexOf(null);
-    if (siguienteVacio !== -1) {
-      setSlotActivo(siguienteVacio);
+  const agregarSabor = (sabor) => {
+    if (caja.length < capacidad) {
+      setCaja([...caja, sabor]);
+    } else {
+      Swal.fire({
+        title: '¡Caja llena!',
+        text: `Ya elegiste tus ${capacidad} donitas. Podés avanzar o quitar alguna de abajo para cambiarla.`,
+        icon: 'info',
+        confirmButtonColor: '#04233f'
+      });
     }
   };
 
-  // Función para buscar los colores y emojis del sabor guardado
-  const getDatosSabor = (id) => MENU_SABORES.find(s => s.id === id);
+  const quitarSabor = (index) => {
+    const nuevaCaja = [...caja];
+    nuevaCaja.splice(index, 1);
+    setCaja(nuevaCaja);
+  };
+
+  const faltantes = capacidad - caja.length;
 
   return (
-    <div className="flex flex-col gap-6">
-      
-      {/* --- LA CAJA VISUAL --- */}
-      <div className="bg-[#fff8e1] p-6 rounded-3xl border-4 border-dashed border-yellow-400 shadow-sm">
-        <h2 className="text-center font-bold text-yellow-700 mb-6 text-lg tracking-wide">
-          {titulo}
-        </h2>
-        
-        <div className="grid grid-cols-3 gap-4 justify-items-center">
-          {saboresCaja.map((saborId, index) => {
-            const esActivo = slotActivo === index;
-            const datosSabor = saborId ? getDatosSabor(saborId) : null;
-            
+    <div className="flex flex-col h-full animate-fade-in">
+       {/* Cabecera flotante con el progreso */}
+       <div className="bg-[#04233f] text-white p-4 rounded-2xl mb-6 shadow-md text-center sticky top-0 z-10">
+          <h2 className="text-xl font-bold mb-1">Armando: {titulo}</h2>
+          <p className="text-[#d99d8f] font-medium text-sm">
+            {faltantes > 0 ? `Te faltan elegir ${faltantes} donitas` : '¡Caja completa! Lista para pedir'}
+          </p>
+          {/* Barra de progreso */}
+          <div className="w-full bg-white/20 rounded-full h-2 mt-3 overflow-hidden">
+            <div 
+              className="bg-[#d99d8f] h-2 transition-all duration-300" 
+              style={{ width: `${(caja.length / capacidad) * 100}%` }}
+            ></div>
+          </div>
+       </div>
+
+       {/* Grilla Visual de Sabores (Acá está la magia de las fotos) */}
+       <h3 className="text-gray-400 font-bold text-xs mb-3 uppercase tracking-wider text-center">Toca para agregar</h3>
+       <div className="grid grid-cols-2 gap-3 mb-8 overflow-y-auto pb-4">
+          {saboresDisponibles.map((sabor) => {
+            // Contamos cuántas veces eligió este sabor específico
+            const cantidadElegida = caja.filter(item => item.id === sabor.id).length;
+
             return (
-              <div 
-                key={index} 
-                onClick={() => setSlotActivo(index)}
-                className={`
-                  w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 border-2
-                  ${esActivo ? 'ring-4 ring-blue-400 ring-offset-2 scale-110 shadow-lg' : 'shadow-inner hover:scale-105'}
-                  ${datosSabor ? `${datosSabor.bg} ${datosSabor.border}` : 'bg-white/60 border-yellow-300'}
-                `}
+              <button 
+                key={sabor.id}
+                onClick={() => agregarSabor(sabor)}
+                className={`bg-white border-2 rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-all relative shadow-sm active:scale-95 ${cantidadElegida > 0 ? 'border-[#d99d8f] bg-orange-50/30' : 'border-gray-100 hover:border-gray-300'}`}
               >
-                {/* Mostramos el + si está vacío, o el emoji del topping si lo tiene */}
-                {!datosSabor && <span className="text-yellow-400 text-3xl font-bold">+</span>}
-                {datosSabor && datosSabor.extra && <span className="text-2xl drop-shadow-md">{datosSabor.extra}</span>}
-              </div>
+                {/* Burbuja que muestra la cantidad si eligió más de una */}
+                {cantidadElegida > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-[#d99d8f] text-[#04233f] w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
+                    {cantidadElegida}
+                  </div>
+                )}
+                
+                {/* La foto sin fondo */}
+                <img 
+                  src={sabor.img} 
+                  alt={sabor.nombre} 
+                  className="w-16 h-16 object-contain drop-shadow-md transition-transform hover:scale-110"
+                  // Si todavía no subiste la foto, muestra el logo para no romper el diseño
+                  onError={(e) => { e.target.src = '/logo.png'; }} 
+                />
+                <span className="font-bold text-[#04233f] text-sm text-center leading-tight">
+                  {sabor.nombre}
+                </span>
+              </button>
             );
           })}
-        </div>
-      </div>
+       </div>
 
-      {/* --- LOS BOTONES DE SABORES (AHORA DINÁMICOS Y CON SCROLL) --- */}
-      <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 pb-24">
-        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">
-          Elegí tu menú Donatello
-        </h3>
-        
-        {/* Contenedor con scroll vertical para no romper la pantalla */}
-        <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
-          
-          {/* El .map() recorre nuestra lista y crea los botones automáticamente */}
-          {MENU_SABORES.map((sabor) => (
-            <button 
-              key={sabor.id}
-              onClick={() => aplicarSabor(sabor.id)}
-              className="flex items-center gap-2 p-2 border-2 border-gray-50 rounded-xl hover:border-pink-300 hover:bg-pink-50 transition-colors text-left"
-            >
-              <div className={`min-w-6 w-6 h-6 rounded-full border border-gray-200 shadow-sm flex items-center justify-center text-[10px] ${sabor.bg} ${sabor.border}`}>
-                {sabor.extra}
-              </div>
-              <span className="font-bold text-gray-600 text-xs sm:text-sm leading-tight">
-                {sabor.nombre}
-              </span>
-            </button>
-          ))}
+       {/* Botón Finalizar y Lista para Quitar */}
+       <div className="mt-auto pt-4 border-t-2 border-gray-100">
+         
+         {/* Mostrar las elegidas como "etiquetas" abajo para poder quitarlas si se arrepiente */}
+         {caja.length > 0 && (
+           <div className="mb-4">
+             <p className="text-xs font-bold text-gray-400 uppercase mb-2">Tu selección (Toca para quitar):</p>
+             <div className="flex flex-wrap gap-2">
+               {caja.map((sabor, index) => (
+                 <button 
+                   key={index}
+                   onClick={() => quitarSabor(index)}
+                   className="bg-gray-100 px-3 py-1.5 rounded-full text-xs font-bold text-[#04233f] hover:bg-red-100 hover:text-red-600 transition-colors flex items-center gap-1 shadow-sm"
+                 >
+                   {sabor.nombre} <span className="text-red-500 text-sm ml-1">×</span>
+                 </button>
+               ))}
+             </div>
+           </div>
+         )}
 
-        </div>
-      </div>
-
-      {/* --- BOTÓN CONTINUAR --- */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-white via-white to-transparent">
-        <button 
-          disabled={saboresCaja.includes(null)} 
-          onClick={() => onFinalizar(saboresCaja)}
-          className="w-full py-4 rounded-2xl font-bold text-lg text-white transition-all disabled:bg-gray-300 disabled:cursor-not-allowed bg-green-500 hover:bg-green-600 shadow-xl"
-        >
-          {saboresCaja.includes(null) ? "Faltan donitas..." : "¡Caja Lista! Continuar"}
-        </button>
-      </div>
-
+         <button 
+            onClick={() => onFinalizar(caja)}
+            disabled={caja.length < capacidad}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
+              caja.length === capacidad 
+              ? 'bg-[#d99d8f] text-[#04233f] hover:bg-[#c98d7f]' 
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+         >
+            {caja.length === capacidad ? '¡Confirmar Caja!' : 'Completá la caja para avanzar'}
+         </button>
+       </div>
     </div>
   );
 }
