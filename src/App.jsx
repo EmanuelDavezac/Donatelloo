@@ -37,19 +37,19 @@ function App() {
               {/* --- EL DISEÑO TIPO HAMA (Lista Limpia) --- */}
               <div className="flex flex-col">
                 
-                <button onClick={() => elegirPaquete({ cantidad: 3, titulo: "Brocheta", precio: 2000 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
+                <button onClick={() => elegirPaquete({ cantidad: 4, titulo: "Brocheta", precio: 2500 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                   {/* Foto cuadrada con bordes redondeados */}
                   <img src="/brocheta.png" alt="Brocheta" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg text-[#04233f]">Brocheta (3)</h3>
+                    <h3 className="font-bold text-lg text-[#04233f]">Brocheta (4)</h3>
                     <p className="text-sm text-gray-500 leading-tight mt-1">Un gustito rápido al paso.</p>
-                    <p className="font-bold text-[#d99d8f] mt-2">${2000}</p>
+                    <p className="font-bold text-[#d99d8f] mt-2">${2500}</p>
                   </div>
                   {/* Flechita sutil a la derecha */}
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
                 </button>
 
-                <button onClick={() => elegirPaquete({ cantidad: 6, titulo: "Media Docena", precio: 3000 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
+                {/* <button onClick={() => elegirPaquete({ cantidad: 6, titulo: "Media Docena", precio: 3000 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                   <img src="/media.png" alt="Media Docena" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-[#04233f]">Media Docena (6)</h3>
@@ -57,7 +57,7 @@ function App() {
                     <p className="font-bold text-[#d99d8f] mt-2">${3000}</p>
                   </div>
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
-                </button>
+                </button> */}
 
                 <button onClick={() => elegirPaquete({ cantidad: 10, titulo: "Vaso Donatello", precio: 4700 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                   <img src="/vaso.png" alt="Vaso Donatello" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
@@ -79,7 +79,7 @@ function App() {
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
                 </button>
 
-                <button onClick={() => elegirPaquete({ cantidad: 24, titulo: "Caja Fiesta", precio: 9500 })} className="flex items-center gap-4 py-4 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
+                {/* <button onClick={() => elegirPaquete({ cantidad: 24, titulo: "Caja Fiesta", precio: 9500 })} className="flex items-center gap-4 py-4 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                   <img src="/fiesta.png" alt="Caja Fiesta" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-[#04233f]">Caja Fiesta (24)</h3>
@@ -87,7 +87,7 @@ function App() {
                     <p className="font-bold text-[#d99d8f] mt-2">${9500}</p>
                   </div>
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
-                </button>
+                </button> */}
 
               </div>
             </div>
