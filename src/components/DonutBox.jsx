@@ -137,7 +137,7 @@ export default function DonutBox({ capacidad, titulo, onFinalizar, onVolver }) {
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
          >
-            {caja.length === capacidad ? '¡Confirmar Caja!' : 'Completá la caja para avanzar'}
+            {caja.length === capacidad ? '¡Confirmar Pedido!' : 'Completá la caja para avanzar'}
          </button>
        </div>
     </div>
