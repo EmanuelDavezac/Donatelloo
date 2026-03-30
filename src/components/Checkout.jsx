@@ -6,7 +6,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   const [metodoEntrega, setMetodoEntrega] = useState('retiro');
   const [direccion, setDireccion] = useState('');
 
-  const costoEnvio = 1500; 
+  const costoEnvio = 2000; 
   const total = paquete.precio + (metodoEntrega === 'envio' ? costoEnvio : 0);
 
   const saboresAgrupados = saboresElegidos.reduce((acc, sabor) => {
