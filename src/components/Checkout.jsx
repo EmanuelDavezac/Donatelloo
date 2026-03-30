@@ -5,8 +5,11 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   const [nombre, setNombre] = useState('');
   const [metodoEntrega, setMetodoEntrega] = useState('retiro');
   const [direccion, setDireccion] = useState('');
+  
+  // En vez de guardar un texto, ahora guardamos un "Objeto de Fecha"
+  const [fechaEntrega, setFechaEntrega] = useState(null); 
 
-  const costoEnvio = 2000; 
+  const costoEnvio = 2000;
   const total = paquete.precio + (metodoEntrega === 'envio' ? costoEnvio : 0);
 
   const saboresAgrupados = saboresElegidos.reduce((acc, sabor) => {
@@ -20,11 +23,37 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     cantidad
   }));
 
+  // --- MAGIA NUEVA: CALCULADORA DE DÍAS AMIGABLES ---
+  // Esto genera una lista automática con los próximos 7 días
+  const diasDisponibles = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  // Función cortita para saber si el botón que tocamos es el que está seleccionado
+  const esMismoDia = (fecha1, fecha2) => {
+    if (!fecha1 || !fecha2) return false;
+    return fecha1.toDateString() === fecha2.toDateString();
+  };
+  // --------------------------------------------------
+
   const enviarPedido = () => {
     if (!nombre.trim()) {
       Swal.fire({
         title: '¡Falta tu nombre!',
         text: 'Por favor, decinos cómo te llamás para anotar tu pedido.',
+        icon: 'warning',
+        confirmButtonColor: '#04233f',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+
+    if (!fechaEntrega) {
+      Swal.fire({
+        title: '¡Falta la fecha!',
+        text: 'Por favor, decinos para qué día querés tus donitas tocando una de las opciones.',
         icon: 'warning',
         confirmButtonColor: '#04233f',
         confirmButtonText: 'Entendido'
@@ -43,8 +72,12 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       return;
     }
 
-    let texto = `🍩 *NUEVO PEDIDO - DONATELLO* 🍩\n\n`;
+    const fechaFormateada = fechaEntrega.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    // Armamos el texto SIN emojis para que no se corrompa en la memoria
+    let texto = `*NUEVO PEDIDO - DONATELLO*\n\n`;
     texto += `*Nombre:* ${nombre}\n`;
+    texto += `*Día de entrega:* ${fechaFormateada}\n`;
     texto += `*Tamaño:* ${paquete.titulo} (${paquete.cantidad} un.)\n\n`;
     
     texto += `*Sabores elegidos:*\n`;
@@ -59,9 +92,10 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     
     texto += `\n*TOTAL:* $${total}\n`;
 
-    // 🚨 ACORDATE DE PONER TU NÚMERO DE WHATSAPP ACÁ
     const numeroWhatsApp = "5493496502191"; 
-    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(texto)}`;
+    
+    // Usamos api.whatsapp.com y le inyectamos la dona (%F0%9F%8D%A9) directo en la URL
+    const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=%F0%9F%8D%A9%20${encodeURIComponent(texto)}`;
     
     Swal.fire({
       title: '¡Pedido listo!',
@@ -80,7 +114,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       <div className="relative z-50 -mt-2 -ml-2 mb-4">
         <button 
           onClick={(e) => {
-            e.preventDefault(); // Evita comportamientos raros del navegador
+            e.preventDefault(); 
             onVolver();
           }} 
           className="text-[#d99d8f] font-bold flex items-center gap-2 py-4 px-4 rounded-xl active:bg-orange-50 transition-colors w-full text-left"
@@ -101,9 +135,9 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
         </ul>
       </div>
 
-      <div className="flex flex-col gap-4 mb-6">
+      <div className="flex flex-col gap-6 mb-8">
         <div>
-          <label className="block text-sm font-bold text-[#04233f] mb-1">Tu Nombre</label>
+          <label className="block text-sm font-bold text-[#04233f] mb-2">Tu Nombre</label>
           <input 
             type="text" 
             value={nombre}
@@ -113,8 +147,48 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           />
         </div>
 
+        {/* --- EL NUEVO SELECTOR DE DÍAS ESTILO RAPPI --- */}
         <div>
-          <label className="block text-sm font-bold text-[#04233f] mb-1">Método de entrega</label>
+          <label className="block text-sm font-bold text-[#04233f] mb-3">
+            ¿Para qué día querés tus Donitas?
+          </label>
+          
+          {/* Contenedor que permite scrollear hacia los costados */}
+          <div className="flex gap-3 overflow-x-auto pb-4 snap-x">
+            {diasDisponibles.map((fecha, i) => {
+              const seleccionado = esMismoDia(fechaEntrega, fecha);
+              
+              // Armamos los textos: "Hoy", "Mañana", o "Mié", "Jue"...
+              let nombreDia = fecha.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '');
+              if (i === 0) nombreDia = 'Hoy';
+              if (i === 1) nombreDia = 'Mañana';
+              
+              const numeroDia = fecha.getDate();
+              const mes = fecha.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '');
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => setFechaEntrega(fecha)}
+                  className={`flex flex-col items-center justify-center min-w-[76px] h-24 rounded-2xl border-2 transition-all snap-start shrink-0 ${
+                    seleccionado 
+                      ? 'border-[#04233f] bg-[#04233f] text-white shadow-lg scale-105' 
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#d99d8f] hover:bg-orange-50'
+                  }`}
+                >
+                  <span className={`text-[11px] font-bold uppercase mb-1 tracking-wider ${seleccionado ? 'text-[#d99d8f]' : 'text-gray-400'}`}>
+                    {nombreDia}
+                  </span>
+                  <span className="text-2xl font-black leading-none mb-1">{numeroDia}</span>
+                  <span className="text-[10px] font-bold uppercase">{mes}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-[#04233f] mb-2">Método de entrega</label>
           <div className="flex gap-2">
             <button 
               onClick={() => setMetodoEntrega('retiro')}
@@ -133,7 +207,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
         {metodoEntrega === 'envio' && (
           <div className="animate-fade-in">
-            <label className="block text-sm font-bold text-[#04233f] mb-1">Dirección (Esperanza)</label>
+            <label className="block text-sm font-bold text-[#04233f] mb-2">Dirección (Esperanza)</label>
             <input 
               type="text" 
               value={direccion}
