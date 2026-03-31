@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
 export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   const [nombre, setNombre] = useState('');
   const [metodoEntrega, setMetodoEntrega] = useState('retiro');
   const [direccion, setDireccion] = useState('');
-  
-  // En vez de guardar un texto, ahora guardamos un "Objeto de Fecha"
   const [fechaEntrega, setFechaEntrega] = useState(null); 
 
   const costoEnvio = 2000;
@@ -23,20 +21,55 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     cantidad
   }));
 
-  // --- MAGIA NUEVA: CALCULADORA DE DÍAS AMIGABLES ---
-  // Esto genera una lista automática con los próximos 7 días
+  // --- CALCULADORA AUTOMÁTICA CON PLAN B ---
+  const [feriados, setFeriados] = useState([]);
+
+  useEffect(() => {
+    const anioActual = new Date().getFullYear();
+    
+    // Llamamos a la API nueva
+    fetch(`https://api.argentinadatos.com/v1/feriados/${anioActual}`)
+      .then(respuesta => respuesta.json())
+      .then(datos => {
+        // La API nueva ya nos devuelve la fecha en formato YYYY-MM-DD
+        const feriadosFormateados = datos.map(feriado => feriado.fecha);
+        console.log("¡Éxito! La API nueva trajo estos feriados:", feriadosFormateados);
+        setFeriados(feriadosFormateados);
+      })
+      .catch(error => {
+        // EL PLAN B: Si la API falla, usamos esta lista de emergencia
+        console.warn("La API falló. Usando feriados de respaldo para no perder ventas.");
+        setFeriados([
+          '2026-04-02', // Jueves Santo
+          '2026-04-03', // Viernes Santo
+          '2026-05-01', // Día del Trabajador
+          '2026-05-25'  // Revolución de Mayo
+        ]);
+      });
+  }, []); 
+
+  const hoyReal = new Date();
+  const diaSemana = hoyReal.getDay(); // 0 es Dom, 4 es Jue, 5 es Vie, 6 es Sab
+
+  const anio = hoyReal.getFullYear();
+  const mes = String(hoyReal.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoyReal.getDate()).padStart(2, '0');
+  const hoyString = `${anio}-${mes}-${dia}`;
+
+  const esFeriado = feriados.includes(hoyString);
+  const esFinde = diaSemana === 0 || diaSemana === 5 || diaSemana === 6 || esFeriado;
+
   const diasDisponibles = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() + i);
+    const sumarDias = esFinde ? i : i + 1;
+    d.setDate(d.getDate() + sumarDias);
     return d;
   });
 
-  // Función cortita para saber si el botón que tocamos es el que está seleccionado
   const esMismoDia = (fecha1, fecha2) => {
     if (!fecha1 || !fecha2) return false;
     return fecha1.toDateString() === fecha2.toDateString();
   };
-  // --------------------------------------------------
 
   const enviarPedido = () => {
     if (!nombre.trim()) {
@@ -53,7 +86,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     if (!fechaEntrega) {
       Swal.fire({
         title: '¡Falta la fecha!',
-        text: 'Por favor, decinos para qué día querés tus donitas tocando una de las opciones.',
+        text: 'Por favor, elegí un día para tus donitas.',
         icon: 'warning',
         confirmButtonColor: '#04233f',
         confirmButtonText: 'Entendido'
@@ -74,7 +107,6 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
     const fechaFormateada = fechaEntrega.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-    // Armamos el texto SIN emojis para que no se corrompa en la memoria
     let texto = `*NUEVO PEDIDO - DONATELLO*\n\n`;
     texto += `*Nombre:* ${nombre}\n`;
     texto += `*Día de entrega:* ${fechaFormateada}\n`;
@@ -94,7 +126,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
     const numeroWhatsApp = "5493496502191"; 
     
-    // Usamos api.whatsapp.com y le inyectamos la dona (%F0%9F%8D%A9) directo en la URL
+    // Inyectamos la dona segura en la URL
     const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=%F0%9F%8D%A9%20${encodeURIComponent(texto)}`;
     
     Swal.fire({
@@ -147,21 +179,20 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           />
         </div>
 
-        {/* --- EL NUEVO SELECTOR DE DÍAS ESTILO RAPPI --- */}
         <div>
           <label className="block text-sm font-bold text-[#04233f] mb-3">
-            ¿Para qué día querés tus Donitas?
+            {esFinde ? "¿Para qué día querés tus Donitas?" : "¿Para qué día encargás tus Donitas?"}
           </label>
           
-          {/* Contenedor que permite scrollear hacia los costados */}
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x">
             {diasDisponibles.map((fecha, i) => {
               const seleccionado = esMismoDia(fechaEntrega, fecha);
-              
-              // Armamos los textos: "Hoy", "Mañana", o "Mié", "Jue"...
+              const mananaReal = new Date();
+              mananaReal.setDate(hoyReal.getDate() + 1);
+
               let nombreDia = fecha.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '');
-              if (i === 0) nombreDia = 'Hoy';
-              if (i === 1) nombreDia = 'Mañana';
+              if (esMismoDia(fecha, hoyReal)) nombreDia = 'Hoy';
+              else if (esMismoDia(fecha, mananaReal)) nombreDia = 'Mañana';
               
               const numeroDia = fecha.getDate();
               const mes = fecha.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '');
@@ -185,6 +216,11 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
               );
             })}
           </div>
+          {!esFinde && (
+            <p className="text-xs text-[#d99d8f] font-semibold mt-1">
+              *De lunes a jueves trabajamos únicamente por encargo previo.
+            </p>
+          )}
         </div>
 
         <div>
