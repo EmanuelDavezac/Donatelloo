@@ -27,29 +27,21 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   useEffect(() => {
     const anioActual = new Date().getFullYear();
     
-    // Llamamos a la API nueva
     fetch(`https://api.argentinadatos.com/v1/feriados/${anioActual}`)
       .then(respuesta => respuesta.json())
       .then(datos => {
-        // La API nueva ya nos devuelve la fecha en formato YYYY-MM-DD
         const feriadosFormateados = datos.map(feriado => feriado.fecha);
-        console.log("¡Éxito! La API nueva trajo estos feriados:", feriadosFormateados);
         setFeriados(feriadosFormateados);
       })
       .catch(error => {
-        // EL PLAN B: Si la API falla, usamos esta lista de emergencia
-        console.warn("La API falló. Usando feriados de respaldo para no perder ventas.");
         setFeriados([
-          '2026-04-02', // Jueves Santo
-          '2026-04-03', // Viernes Santo
-          '2026-05-01', // Día del Trabajador
-          '2026-05-25'  // Revolución de Mayo
+          '2026-04-02', '2026-04-03', '2026-05-01', '2026-05-25'
         ]);
       });
   }, []); 
 
   const hoyReal = new Date();
-  const diaSemana = hoyReal.getDay(); // 0 es Dom, 4 es Jue, 5 es Vie, 6 es Sab
+  const diaSemana = hoyReal.getDay(); 
 
   const anio = hoyReal.getFullYear();
   const mes = String(hoyReal.getMonth() + 1).padStart(2, '0');
@@ -125,8 +117,6 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     texto += `\n*TOTAL:* $${total}\n`;
 
     const numeroWhatsApp = "5493496502191"; 
-    
-    // Inyectamos la dona segura en la URL
     const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=%F0%9F%8D%A9%20${encodeURIComponent(texto)}`;
     
     Swal.fire({
@@ -168,12 +158,18 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       </div>
 
       <div className="flex flex-col gap-6 mb-8">
+        {/* --- ACÁ ESTÁ EL INPUT DE NOMBRE QUE NO ACEPTA NÚMEROS --- */}
         <div>
           <label className="block text-sm font-bold text-[#04233f] mb-2">Tu Nombre</label>
           <input 
             type="text" 
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            onChange={(e) => {
+              const textoIngresado = e.target.value;
+              if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(textoIngresado)) {
+                setNombre(textoIngresado);
+              }
+            }}
             className="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#d99d8f]"
             placeholder="Ej: Emanuel..."
           />
@@ -218,7 +214,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           </div>
           {!esFinde && (
             <p className="text-xs text-[#d99d8f] font-semibold mt-1">
-              *De Lunes a Viernes trabajamos únicamente por encargo previo.
+              *De lunes a jueves trabajamos únicamente por encargo previo.
             </p>
           )}
         </div>
