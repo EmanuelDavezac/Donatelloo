@@ -109,7 +109,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       texto += `- ${sabor.cantidad}x ${sabor.nombre}\n`;
     });
 
-    texto += `\n*Entrega:* ${metodoEntrega === 'envio' ? 'Envío a domicilio' : 'Retiro por el local'}\n`;
+    texto += `\n*Entrega:* ${metodoEntrega === 'envio' ? 'Envío a domicilio' : 'Retiro por el local (Uruguay 1340)'}\n`;
     if (metodoEntrega === 'envio') {
       texto += `*Dirección:* ${direccion}\n`;
     }
@@ -214,7 +214,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           </div>
           {!esFinde && (
             <p className="text-xs text-[#d99d8f] font-semibold mt-1">
-              *De lunes a jueves trabajamos únicamente por encargo previo.
+              *De lunes a viernes trabajamos únicamente por encargo previo.
             </p>
           )}
         </div>
