@@ -64,7 +64,7 @@ function App() {
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-[#04233f]">Vaso Donatello (10)</h3>
                     <p className="text-sm text-gray-500 leading-tight mt-1">Ideal para ir comiendo.</p>
-                    <p className="font-bold text-[#d99d8f] mt-2">${4700}</p>
+                    <p className="font-bold text-[#d99d8f] mt-2">${4300}</p>
                   </div>
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
                 </button>
@@ -79,7 +79,7 @@ function App() {
                   <span className="text-gray-300 text-3xl font-light pr-2">›</span>
                 </button>
 
-                <button onClick={() => elegirPaquete({ cantidad: 24, titulo: "Caja Fiesta", precio: 9500 })} className="flex items-center gap-4 py-4 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
+                <button onClick={() => elegirPaquete({ cantidad: 24, titulo: "Caja Fiesta", precio: 9000 })} className="flex items-center gap-4 py-4 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                   <img src="/fiesta.png" alt="Caja Fiesta" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-[#04233f]">Caja Fiesta (24)</h3>
