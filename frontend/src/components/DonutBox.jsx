@@ -18,7 +18,7 @@ export default function DonutBox({ capacidad, titulo, onFinalizar, onVolver }) {
     { id: 'coco-blanco', nombre: 'Coco en Blanco', img: '/coco-blanco.png' },
     { id: 'coco-negro', nombre: 'Coco en Negro', img: '/coco-negro.png' },
     { id: 'marmolado', nombre: 'Marmolado', img: '/marmolado.png' },
-    { id: 'grana', nombre: 'Grana', img: '/grana.png' },
+    { id: 'grana', nombre: 'Grana', img: 'frontend\public\grana.png' },
   ];
 
   const agregarSabor = (sabor) => {

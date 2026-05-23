@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\"C:\\\\Users\\\\Emanuel7\\\\donatello-app\\\\frontend\\\\public\\\\grana.png\"\\) | Select-Object -First 8; $bytes | ForEach-Object { \"{0:X2}\" -f $_ })"
+    ]
+  }
+}
