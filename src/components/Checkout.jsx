@@ -41,22 +41,36 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
   }, []); 
 
   const hoyReal = new Date();
-  const diaSemana = hoyReal.getDay(); 
 
+  // Para saber si ESTE MES/DÍA es un fin de semana o feriado actualmente (como info extra)
+  const diaSemanaHoy = hoyReal.getDay();
   const anio = hoyReal.getFullYear();
   const mes = String(hoyReal.getMonth() + 1).padStart(2, '0');
   const dia = String(hoyReal.getDate()).padStart(2, '0');
   const hoyString = `${anio}-${mes}-${dia}`;
+  const esFeriadoHoy = feriados.includes(hoyString);
+  const esFindeHoy = diaSemanaHoy === 0 || diaSemanaHoy === 6 || esFeriadoHoy;
 
-  const esFeriado = feriados.includes(hoyString);
-  const esFinde = diaSemana === 0 || diaSemana === 5 || diaSemana === 6 || esFeriado;
+  // Generar las próximas fechas habilitadas (Sábados, Domingos y Feriados)
+  const diasDisponibles = [];
+  let fechaIterador = new Date();
 
-  const diasDisponibles = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    const sumarDias = esFinde ? i : i + 1;
-    d.setDate(d.getDate() + sumarDias);
-    return d;
-  });
+  // Si hoy NO es finde/feriado, empezamos a ofrecer a partir de mañana, 
+  // o si querés que puedan pedir para hoy mismo si es suertudo, lo dejamos.
+  // Vamos a buscar los próximos 6 días válidos.
+  while (diasDisponibles.length < 6) {
+    const dSemana = fechaIterador.getDay();
+    const dStr = `${fechaIterador.getFullYear()}-${String(fechaIterador.getMonth() + 1).padStart(2, '0')}-${String(fechaIterador.getDate()).padStart(2, '0')}`;
+    const esFeriadoIterador = feriados.includes(dStr);
+
+    // Solo habilitar Sábados (6), Domingos (0) y Feriados
+    if (dSemana === 0 || dSemana === 6 || esFeriadoIterador) {
+      diasDisponibles.push(new Date(fechaIterador));
+    }
+    
+    // Avanzar un día
+    fechaIterador.setDate(fechaIterador.getDate() + 1);
+  }
 
   const esMismoDia = (fecha1, fecha2) => {
     if (!fecha1 || !fecha2) return false;
@@ -177,7 +191,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
         <div>
           <label className="block text-sm font-bold text-[#04233f] mb-3">
-            {esFinde ? "¿Para qué día querés tus Donitas?" : "¿Para qué día encargás tus Donitas?"}
+            {esFindeHoy ? "¿Para qué día querés tus Donitas?" : "¿Para qué día encargás tus Donitas?"}
           </label>
           
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x">
@@ -212,7 +226,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
               );
             })}
           </div>
-          {!esFinde && (
+          {!esFindeHoy && (
             <p className="text-xs text-[#d99d8f] font-semibold mt-1">
               *De lunes a viernes trabajamos únicamente por encargo previo.
             </p>
