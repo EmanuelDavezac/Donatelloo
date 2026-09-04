@@ -99,7 +99,7 @@ function App() {
                       <span className="text-gray-300 text-3xl font-light pr-2">›</span>
                     </button>
 
-                    <button onClick={() => elegirPaquete({ cantidad: 12, titulo: "La Docena", precio: 4500 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
+                    <button onClick={() => elegirPaquete({ cantidad: 12, titulo: "La Docena", precio: 4800 })} className="flex items-center gap-4 py-4 border-b border-gray-100 w-full text-left bg-white hover:bg-gray-50 transition-colors active:bg-gray-100">
                       <img src="/docena.png" alt="Docena" className="w-20 h-20 rounded-2xl object-cover bg-gray-50 shadow-sm border border-gray-100" />
                       <div className="flex-1">
                         <h3 className="font-bold text-lg text-[#04233f]">La Docena (12)</h3>
