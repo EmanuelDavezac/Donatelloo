@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Swal from 'sweetalert2';
 import Header from './components/Header';
 import DonutBox from './components/DonutBox';
 import Checkout from './components/Checkout';
@@ -6,8 +7,25 @@ import Checkout from './components/Checkout';
 function App() {
   const [paso, setPaso] = useState(1);
   const [paquete, setPaquete] = useState(null);
-  const [sabores, setSabores] = useState([]);
   const [tipoTab, setTipoTab] = useState('dulces');
+  const [pedidos, setPedidos] = useState([]);
+
+  const agregarAlCarrito = (paqueteActual, saboresActuales) => {
+    setPedidos((actual) => [...actual, { paquete: paqueteActual, sabores: saboresActuales }]);
+
+    Swal.fire({
+      title: '¡Caja agregada!',
+      text: '¿Querés agregar otra caja o finalizar tu pedido?',
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: 'Finalizar pedido',
+      cancelButtonText: 'Agregar otra caja',
+      confirmButtonColor: '#04233f',
+      cancelButtonColor: '#d99d8f'
+    }).then((resultado) => {
+      setPaso(resultado.isConfirmed ? 3 : 1);
+    });
+  };
 
   const elegirPaquete = (seleccion) => {
     if (seleccion.tipo === 'salada') {
@@ -16,9 +34,7 @@ function App() {
         nombre: 'Jamón y Queso',
         img: '/logo.png'
       });
-      setPaquete(seleccion);
-      setSabores(cajaArmada);
-      setPaso(3);
+      agregarAlCarrito(seleccion, cajaArmada);
       return;
     }
     setPaquete(seleccion);
@@ -26,8 +42,11 @@ function App() {
   };
 
   const finalizarCaja = (cajaArmada) => {
-    setSabores(cajaArmada);
-    setPaso(3);
+    agregarAlCarrito(paquete, cajaArmada);
+  };
+
+  const quitarPedido = (index) => {
+    setPedidos((actual) => actual.filter((_, i) => i !== index));
   };
 
   return (
@@ -45,6 +64,18 @@ function App() {
                 Nuestras Cajas
               </h2>
               <p className="text-sm text-gray-500 mb-6">Armá tu caja a medida y elegí tus sabores favoritos.</p>
+
+              {pedidos.length > 0 && (
+                <button
+                  onClick={() => setPaso(3)}
+                  className="w-full flex items-center justify-between bg-[#04233f] text-white rounded-xl px-4 py-3 mb-6 shadow-md active:scale-95 transition-transform"
+                >
+                  <span className="font-bold text-sm">
+                    🛒 {pedidos.length} {pedidos.length === 1 ? 'caja' : 'cajas'} en el carrito
+                  </span>
+                  <span className="text-[#d99d8f] font-bold text-sm">Ver pedido ›</span>
+                </button>
+              )}
 
               {/* Tabs para Dulces y Saladas */}
               <div className="flex bg-gray-100 rounded-xl p-1 mb-6 mt-2">
@@ -147,7 +178,11 @@ function App() {
           )}
 
           {paso === 3 && (
-            <Checkout paquete={paquete} saboresElegidos={sabores} onVolver={() => setPaso(2)} />
+            <Checkout
+              pedidos={pedidos}
+              onQuitarPedido={quitarPedido}
+              onAgregarOtra={() => setPaso(1)}
+            />
           )}
 
         </main>

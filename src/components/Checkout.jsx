@@ -1,44 +1,48 @@
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
-export default function Checkout({ paquete, saboresElegidos, onVolver }) {
+export default function Checkout({ pedidos, onQuitarPedido, onAgregarOtra }) {
   const [nombre, setNombre] = useState('');
   const [metodoEntrega, setMetodoEntrega] = useState('retiro');
   const [direccion, setDireccion] = useState('');
-  const [fechaEntrega, setFechaEntrega] = useState(null); 
+  const [notas, setNotas] = useState('');
+  const [fechaEntrega, setFechaEntrega] = useState(null);
 
   const costoEnvio = 2000;
-  const total = paquete.precio + (metodoEntrega === 'envio' ? costoEnvio : 0);
+  const totalCajas = pedidos.reduce((acc, pedido) => acc + pedido.paquete.precio, 0);
+  const total = totalCajas + (metodoEntrega === 'envio' ? costoEnvio : 0);
 
-  const saboresAgrupados = saboresElegidos.reduce((acc, sabor) => {
-    const nombreSabor = typeof sabor === 'string' ? sabor : (sabor.nombre || 'Donut');
-    acc[nombreSabor] = (acc[nombreSabor] || 0) + 1;
-    return acc;
-  }, {});
+  const agruparSabores = (saboresElegidos) => {
+    const saboresAgrupados = saboresElegidos.reduce((acc, sabor) => {
+      const nombreSabor = typeof sabor === 'string' ? sabor : (sabor.nombre || 'Donut');
+      acc[nombreSabor] = (acc[nombreSabor] || 0) + 1;
+      return acc;
+    }, {});
 
-  const listaFinalSabores = Object.entries(saboresAgrupados).map(([nombre, cantidad]) => ({
-    nombre,
-    cantidad
-  }));
+    return Object.entries(saboresAgrupados).map(([nombre, cantidad]) => ({
+      nombre,
+      cantidad
+    }));
+  };
 
   // --- CALCULADORA AUTOMÁTICA CON PLAN B ---
   const [feriados, setFeriados] = useState([]);
 
   useEffect(() => {
     const anioActual = new Date().getFullYear();
-    
+
     fetch(`https://api.argentinadatos.com/v1/feriados/${anioActual}`)
       .then(respuesta => respuesta.json())
       .then(datos => {
         const feriadosFormateados = datos.map(feriado => feriado.fecha);
         setFeriados(feriadosFormateados);
       })
-      .catch(error => {
+      .catch(() => {
         setFeriados([
           '2026-04-02', '2026-04-03', '2026-05-01', '2026-05-25'
         ]);
       });
-  }, []); 
+  }, []);
 
   const hoyReal = new Date();
 
@@ -67,7 +71,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
     if (dSemana === 0 || dSemana === 6 || esFeriadoIterador) {
       diasDisponibles.push(new Date(fechaIterador));
     }
-    
+
     // Avanzar un día
     fechaIterador.setDate(fechaIterador.getDate() + 1);
   }
@@ -99,7 +103,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
       });
       return;
     }
-    
+
     if (metodoEntrega === 'envio' && !direccion.trim()) {
       Swal.fire({
         title: '¡Falta la dirección!',
@@ -115,30 +119,36 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
     let texto = `*NUEVO PEDIDO - DONATELLO*\n\n`;
     texto += `*Nombre:* ${nombre}\n`;
-    texto += `*Día de entrega:* ${fechaFormateada}\n`;
-    texto += `*Tamaño:* ${paquete.titulo} (${paquete.cantidad} un.)\n\n`;
-    
-    texto += `*Sabores elegidos:*\n`;
-    listaFinalSabores.forEach(sabor => {
-      texto += `- ${sabor.cantidad}x ${sabor.nombre}\n`;
+    texto += `*Día de entrega:* ${fechaFormateada}\n\n`;
+
+    pedidos.forEach((pedido, i) => {
+      texto += `*Caja ${i + 1}: ${pedido.paquete.titulo}* (${pedido.paquete.cantidad} un.)\n`;
+      agruparSabores(pedido.sabores).forEach(sabor => {
+        texto += `- ${sabor.cantidad}x ${sabor.nombre}\n`;
+      });
+      texto += `\n`;
     });
 
-    texto += `\n*Entrega:* ${metodoEntrega === 'envio' ? 'Envío a domicilio' : 'Retiro por el local (Uruguay 1340)'}\n`;
+    texto += `*Entrega:* ${metodoEntrega === 'envio' ? 'Envío a domicilio' : 'Retiro por el local (Uruguay 1340)'}\n`;
     if (metodoEntrega === 'envio') {
       texto += `*Dirección:* ${direccion}\n`;
     }
-    
+
+    if (notas.trim()) {
+      texto += `\n*Notas:* ${notas.trim()}\n`;
+    }
+
     texto += `\n*TOTAL:* $${total}\n`;
 
-    const numeroWhatsApp = "5493496502191"; 
+    const numeroWhatsApp = "5493496502191";
     const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=%F0%9F%8D%A9%20${encodeURIComponent(texto)}`;
-    
+
     Swal.fire({
       title: '¡Pedido listo!',
       text: 'Te estamos redirigiendo a WhatsApp para confirmar...',
       icon: 'success',
       showConfirmButton: false,
-      timer: 2000 
+      timer: 2000
     }).then(() => {
       window.location.href = url;
     });
@@ -146,37 +156,48 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border-2 border-[#d99d8f]/30">
-      
+
       <div className="relative z-50 -mt-2 -ml-2 mb-4">
-        <button 
+        <button
           onClick={(e) => {
-            e.preventDefault(); 
-            onVolver();
-          }} 
+            e.preventDefault();
+            onAgregarOtra();
+          }}
           className="text-[#d99d8f] font-bold flex items-center gap-2 py-4 px-4 rounded-xl active:bg-orange-50 transition-colors w-full text-left"
         >
-          <span className="text-2xl leading-none">❮</span> 
-          <span className="text-lg">Volver a la caja</span>
+          <span className="text-2xl leading-none">❮</span>
+          <span className="text-lg">Agregar otra caja</span>
         </button>
       </div>
 
       <h2 className="text-xl font-bold text-[#04233f] mb-6">Resumen de tu pedido</h2>
-      
-      <div className="bg-[#fdfbf7] p-4 rounded-xl mb-6">
-        <p className="font-bold text-[#04233f]">{paquete.titulo} - ${paquete.precio}</p>
-        <ul className="text-sm text-gray-600 mt-2">
-          {listaFinalSabores.map((s, i) => (
-            <li key={i}>• {s.cantidad}x {s.nombre}</li>
-          ))}
-        </ul>
+
+      <div className="flex flex-col gap-3 mb-6">
+        {pedidos.map((pedido, i) => (
+          <div key={i} className="bg-[#fdfbf7] p-4 rounded-xl relative">
+            <button
+              onClick={() => onQuitarPedido(i)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-red-500 font-bold text-sm"
+              aria-label="Quitar caja"
+            >
+              ✕
+            </button>
+            <p className="font-bold text-[#04233f] pr-6">{pedido.paquete.titulo} - ${pedido.paquete.precio}</p>
+            <ul className="text-sm text-gray-600 mt-2">
+              {agruparSabores(pedido.sabores).map((s, j) => (
+                <li key={j}>• {s.cantidad}x {s.nombre}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       <div className="flex flex-col gap-6 mb-8">
         {/* --- ACÁ ESTÁ EL INPUT DE NOMBRE QUE NO ACEPTA NÚMEROS --- */}
         <div>
           <label className="block text-sm font-bold text-[#04233f] mb-2">Tu Nombre</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={nombre}
             onChange={(e) => {
               const textoIngresado = e.target.value;
@@ -193,7 +214,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
           <label className="block text-sm font-bold text-[#04233f] mb-3">
             {esFindeHoy ? "¿Para qué día querés tus Donitas?" : "¿Para qué día encargás tus Donitas?"}
           </label>
-          
+
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x">
             {diasDisponibles.map((fecha, i) => {
               const seleccionado = esMismoDia(fechaEntrega, fecha);
@@ -203,7 +224,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
               let nombreDia = fecha.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '');
               if (esMismoDia(fecha, hoyReal)) nombreDia = 'Hoy';
               else if (esMismoDia(fecha, mananaReal)) nombreDia = 'Mañana';
-              
+
               const numeroDia = fecha.getDate();
               const mes = fecha.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '');
 
@@ -211,11 +232,10 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
                 <button
                   key={i}
                   onClick={() => setFechaEntrega(fecha)}
-                  className={`flex flex-col items-center justify-center min-w-[76px] h-24 rounded-2xl border-2 transition-all snap-start shrink-0 ${
-                    seleccionado 
-                      ? 'border-[#04233f] bg-[#04233f] text-white shadow-lg scale-105' 
+                  className={`flex flex-col items-center justify-center min-w-19 h-24 rounded-2xl border-2 transition-all snap-start shrink-0 ${seleccionado
+                      ? 'border-[#04233f] bg-[#04233f] text-white shadow-lg scale-105'
                       : 'border-gray-200 bg-white text-gray-500 hover:border-[#d99d8f] hover:bg-orange-50'
-                  }`}
+                    }`}
                 >
                   <span className={`text-[11px] font-bold uppercase mb-1 tracking-wider ${seleccionado ? 'text-[#d99d8f]' : 'text-gray-400'}`}>
                     {nombreDia}
@@ -236,13 +256,13 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
         <div>
           <label className="block text-sm font-bold text-[#04233f] mb-2">Método de entrega</label>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={() => setMetodoEntrega('retiro')}
               className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all active:scale-95 ${metodoEntrega === 'retiro' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
             >
               Retiro
             </button>
-            <button 
+            <button
               onClick={() => setMetodoEntrega('envio')}
               className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all active:scale-95 ${metodoEntrega === 'envio' ? 'border-[#04233f] bg-[#04233f] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
             >
@@ -254,8 +274,8 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
         {metodoEntrega === 'envio' && (
           <div className="animate-fade-in">
             <label className="block text-sm font-bold text-[#04233f] mb-2">Dirección (Esperanza)</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={direccion}
               onChange={(e) => setDireccion(e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#d99d8f]"
@@ -264,6 +284,17 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
             <p className="text-xs font-bold text-[#d99d8f] mt-1">+ Costo de envío: ${costoEnvio}</p>
           </div>
         )}
+
+        <div>
+          <label className="block text-sm font-bold text-[#04233f] mb-2">Notas (opcional)</label>
+          <textarea
+            value={notas}
+            onChange={(e) => setNotas(e.target.value)}
+            rows={3}
+            className="w-full border-2 border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#d99d8f] resize-none"
+            placeholder="Ej: portón negro a la izquierda, tocar timbre, sin maní..."
+          />
+        </div>
       </div>
 
       <div className="border-t-2 border-gray-100 pt-4 mb-6 flex justify-between items-center">
@@ -271,7 +302,7 @@ export default function Checkout({ paquete, saboresElegidos, onVolver }) {
         <span className="text-2xl font-bold text-green-600">${total}</span>
       </div>
 
-      <button 
+      <button
         onClick={enviarPedido}
         className="w-full bg-[#d99d8f] text-[#04233f] text-lg font-bold py-4 rounded-xl shadow-md hover:bg-[#c98d7f] active:scale-95 transition-all"
       >
