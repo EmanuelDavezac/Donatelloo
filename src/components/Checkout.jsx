@@ -82,6 +82,17 @@ export default function Checkout({ pedidos, onQuitarPedido, onAgregarOtra }) {
   };
 
   const enviarPedido = () => {
+    if (pedidos.length === 0) {
+      Swal.fire({
+        title: '¡Carrito vacío!',
+        text: 'Agregá al menos una caja antes de enviar el pedido.',
+        icon: 'warning',
+        confirmButtonColor: '#04233f',
+        confirmButtonText: 'Entendido'
+      }).then(() => onAgregarOtra());
+      return;
+    }
+
     if (!nombre.trim()) {
       Swal.fire({
         title: '¡Falta tu nombre!',
